@@ -53,10 +53,10 @@ public class ConsultaCepRepository {
     // CREATE - salva o resultado de uma consulta (requisicao + resposta + tempo)
     public ConsultaCep salvar(ConsultaCep consulta) {
         String sql = """
-                INSERT INTO consultas_cep
-                (cep, logradouro, bairro, localidade, uf, tempo_resposta_ms, data_consulta)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-                """;
+            INSERT INTO consultas_cep
+            (cep, logradouro, bairro, localidade, uf, tempo_resposta_ms, data_consulta)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """;
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
@@ -71,7 +71,8 @@ public class ConsultaCepRepository {
             return ps;
         }, keyHolder);
 
-        consulta.setId(keyHolder.getKey().longValue());
+        Number id = (Number) keyHolder.getKeys().get("id");
+        consulta.setId(id.longValue());
         return consulta;
     }
 
