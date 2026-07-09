@@ -57,11 +57,17 @@ public class SqsListenerService {
         }
     }
 
-    private String extrairCep(String corpoMensagem) throws Exception {
-        JsonNode json = objectMapper.readTree(corpoMensagem);
-        String bruto = json.has("Message") ? json.get("Message").asText() : corpoMensagem;
+    private String extrairCep(String corpoMensagem) {
+        String bruto;
 
-        // Remove qualquer caractere que não seja dígito (hífen, espaço, etc.)
+        try {
+            JsonNode json = objectMapper.readTree(corpoMensagem);
+            bruto = json.has("Message") ? json.get("Message").asText() : corpoMensagem;
+        } catch (Exception e) {
+            // Não é JSON (veio direto pro SQS, sem envelope do SNS) -- usa o texto puro
+            bruto = corpoMensagem;
+        }
+
         String cepLimpo = bruto.replaceAll("[^0-9]", "");
 
         if (cepLimpo.length() != 8) {
