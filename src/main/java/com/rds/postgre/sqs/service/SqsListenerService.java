@@ -59,9 +59,15 @@ public class SqsListenerService {
 
     private String extrairCep(String corpoMensagem) throws Exception {
         JsonNode json = objectMapper.readTree(corpoMensagem);
-        if (json.has("Message")) {
-            return json.get("Message").asText().trim();
+        String bruto = json.has("Message") ? json.get("Message").asText() : corpoMensagem;
+
+        // Remove qualquer caractere que não seja dígito (hífen, espaço, etc.)
+        String cepLimpo = bruto.replaceAll("[^0-9]", "");
+
+        if (cepLimpo.length() != 8) {
+            throw new IllegalArgumentException("CEP inválido: " + bruto);
         }
-        return corpoMensagem.trim();
+
+        return cepLimpo;
     }
 }
