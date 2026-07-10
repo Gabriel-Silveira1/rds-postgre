@@ -45,7 +45,7 @@ public class SqsController {
     }
 
     @DeleteMapping("/mensagem")
-    public ResponseEntity<String> removerMensagem(@RequestParam String receiptHandle) {
+    public ResponseEntity<String> removerMensagem(@RequestBody String receiptHandle) {
         sqsService.removerMensagem(receiptHandle);
         return ResponseEntity.ok("Mensagem removida");
     }
