@@ -8,6 +8,7 @@ import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -67,5 +68,52 @@ public class SqsService {
 
         sqsClient.purgeQueue(request);
         log.warn("Fila purgada manualmente via endpoint");
+    }
+
+    public List<Map<String, String>> visualizarComHandle() {
+        ReceiveMessageRequest request = ReceiveMessageRequest.builder()
+                .queueUrl(queueUrl)
+                .maxNumberOfMessages(10)
+                .waitTimeSeconds(2)
+                .build();
+
+        List<Message> mensagens = sqsClient.receiveMessage(request).messages();
+
+        return mensagens.stream()
+                .map(m -> Map.of(
+                        "corpo", m.body(),
+                        "receiptHandle", m.receiptHandle()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    public void removerMensagem(String receiptHandle) {
+        sqsClient.deleteMessage(DeleteMessageRequest.builder()
+                .queueUrl(queueUrl)
+                .receiptHandle(receiptHandle)
+                .build());
+        log.info("Mensagem removida manualmente da fila");
+    }
+
+    public Map<String, String> chamarProximo() {
+        ReceiveMessageRequest request = ReceiveMessageRequest.builder()
+                .queueUrl(queueUrl)
+                .maxNumberOfMessages(1)
+                .waitTimeSeconds(2)
+                .build();
+
+        List<Message> mensagens = sqsClient.receiveMessage(request).messages();
+
+        if (mensagens.isEmpty()) {
+            return Map.of("status", "fila vazia");
+        }
+
+        Message proxima = mensagens.get(0);
+        removerMensagem(proxima.receiptHandle());
+
+        return Map.of(
+                "status", "atendido e removido",
+                "conteudo", proxima.body()
+        );
     }
 }

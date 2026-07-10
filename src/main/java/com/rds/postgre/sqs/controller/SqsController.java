@@ -38,4 +38,20 @@ public class SqsController {
         sqsService.limparFila();
         return ResponseEntity.ok("Fila limpa com sucesso");
     }
+
+    @GetMapping("/visualizar-detalhado")
+    public ResponseEntity<List<Map<String, String>>> visualizarDetalhado() {
+        return ResponseEntity.ok(sqsService.visualizarComHandle());
+    }
+
+    @DeleteMapping("/mensagem")
+    public ResponseEntity<String> removerMensagem(@RequestParam String receiptHandle) {
+        sqsService.removerMensagem(receiptHandle);
+        return ResponseEntity.ok("Mensagem removida");
+    }
+
+    @PostMapping("/chamar-proximo")
+    public ResponseEntity<Map<String, String>> chamarProximo() {
+        return ResponseEntity.ok(sqsService.chamarProximo());
+    }
 }
